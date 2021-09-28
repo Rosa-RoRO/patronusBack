@@ -23,33 +23,43 @@ router.get('/news', async (req, res) => {
 
 router.get('/followers', async (req, res) => {
     const athletes = await getAllAthletes();
-    (async () => {
-        const browser = await puppeteer.launch({
-            headless: false
-        });
-        const page = await browser.newPage();
-        await page.goto('https://www.instagram.com/virginiatr6/?hl=es');
-        await page.screenshot({ path: 'example.png' });
-      
-        const seguidoresInsta = await page.evaluate(() => document.querySelectorAll('.g47SY')[1].innerText.slice(0, 3));
-        console.log('Instagram', seguidoresInsta);
-      
-        await browser.close();
-      })();
-      (async () => {
-        const browser = await puppeteer.launch({
-            headless: false
-        });
-        const page = await browser.newPage();
-        await page.goto('https://www.tiktok.com/@fatifemalesports?');
-        await page.screenshot({ path: 'example.png' });
-        const seguidoresTikTok = await await page.evaluate(() => document.querySelectorAll('.number')[1].innerText.seguidoresletra.slice(0, 5));
-  
-        console.log('tiktok', seguidoresTikTok);
+    console.log(athletes);
+    const athletesInstagram = athletes.forEach((athlete) => {
+        (async () => {
+            const browser = await puppeteer.launch({
+                headless: false
+            });
+            const page = await browser.newPage();
+            await page.goto(`https://www.instagram.com/${athlete.userinstagram}/?hl=es`);
+            await page.screenshot({ path: 'example.png' });
+            
+            let seguidoresInsta = await page.evaluate(() => document.querySelectorAll('.g47SY')[1].innerText.slice(0, 3));
+            console.log('Instagram', seguidoresInsta);
 
-        await browser.close();
+            // ir añadiéndolos en un array 
+
+
+            // insertar base de datos:
+            const followers = await updateFollowers(followersInstagram);
+
+            await browser.close();
+        })();
+    })
+    //   (async () => {
+    //     const browser = await puppeteer.launch({
+    //         headless: false
+    //     });
+    //     const page = await browser.newPage();
+    //     await page.goto(`https://www.tiktok.com/@${athlete.usertiktok}?`);
+    //     await page.screenshot({ path: 'example.png' });
+    //     const seguidoresTikTok = await await page.evaluate(() => document.querySelectorAll('.number')[1].innerText.slice(0, 3));
   
-    })();
+    //     console.log('tiktok', seguidoresTikTok);
+
+    //     await browser.close();
+  
+
+    // })();
     res.json('Todo ok');
 
     // recuperar todos los atletas 

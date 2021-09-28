@@ -129,6 +129,7 @@ const getAthleteExists = (fk_sponsor, { email }) => {
 )
 };
 
+
 // darse de baja
 
 const deleteAccount = (idAthlete) => {

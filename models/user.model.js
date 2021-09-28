@@ -64,7 +64,7 @@ const getByEmail = (email) => {
 // recuperar todos los atletas 
 
 const getAllAthletes = () => {
-        return executeUniqueQuery('SELECT * FROM patronus.athletes', 
+        return executeQuery('SELECT * FROM patronus.athletes', 
         []
     );
 }
@@ -80,6 +80,7 @@ const getByIdSponsor = (idSponsor) => {
     return executeUniqueQuery('SELECT * FROM users WHERE fk_sponsor = ?',
     [idSponsor])
 };
+
 
 
 
@@ -107,9 +108,9 @@ const changeStatus = ({fk_athletes, fk_sponsors, participations, status, id}) =>
 
 // actualizar followers Intagram y TikTok
 
-const updateFollowers = (instagram, tiktok, id) => {
-        return executeQuery('UPDATE patronus.athletes SET instagram = ?, tiktok = ? WHERE id = ?',
-        [instagram, tiktok, id]
+const updateFollowers = (followersInstagram) => {
+        return executeQuery('UPDATE patronus.athletes SET followersinstagram = ?',
+        [followersInstagram]
     )
 };
 
