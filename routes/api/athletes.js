@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 
-const { getById, getAllOffers, getOffersWaiting, getOffersRejecteds, deleteAccount, editDatesAthlete, editDatesUser, acceptOffer, rejectOffer, createNew, getAthleteExists, getEmail, updateParticipations, updatePercentage, totalParticipations } = require('../../models/athlete.model');
+const { getById, getAllOffers, getOffersWaiting, getOffersRejecteds, deleteAccount, editDatesAthlete, editDatesUser, acceptOffer, rejectOffer, createNew, getAthleteExists, getEmail, updateParticipations, updatePercentage, totalParticipations, getEmailAthlete, resetPassword } = require('../../models/athlete.model');
 const { route } = require('./sponsors');
 
 
@@ -29,7 +29,6 @@ router.get('/allOffers/:idAthlete', async (req, res) => {
 
 
 // ver todas las ofertas (el histórico total)
-// ¿Las ordenamos por a la espera - aceptadas y rechazadas?
 
 router.get('/offers/:idAthlete', async (req, res) => {
     try {
@@ -68,6 +67,7 @@ router.get('/holdOffers/:idAthlete', async (req, res) => {
 })
 
 
+// recuperar usuario 
 
 router.get('/email/:idAthlete', async (req, res) => {
     const idAthlete = req.params.idAthlete;
@@ -75,6 +75,8 @@ router.get('/email/:idAthlete', async (req, res) => {
     res.json(result);
 })
 
+
+// recuperar atleta por id
 
 router.get('/:idAthlete', async (req, res) => {
     try {
@@ -85,6 +87,9 @@ router.get('/:idAthlete', async (req, res) => {
         res.json({error: err.message});
     }
 });
+
+
+// crear noticia
 
 
 router.post('/createNew/:idAthlete', upload.single('photo'), async(req, res) => {
@@ -106,12 +111,16 @@ router.post('/createNew/:idAthlete', upload.single('photo'), async(req, res) => 
 
 
 
+// aceptar oferta
 
 router.put('/acceptOffer/:idOffer', async (req, res) => {
     const idOffer = req.params.idOffer;
     const result = await acceptOffer(idOffer);
     res.json(result);
 })
+
+
+// rechazar oferta
 
 router.put('/rejectOffer/:idOffer/:idAthlete', async (req, res) => {
     const idOffer = req.params.idOffer;
@@ -125,7 +134,6 @@ router.put('/rejectOffer/:idOffer/:idAthlete', async (req, res) => {
     const percentage = await updatePercentage(percentageTotal, idAthlete);
     res.json(percentage);
 });
-
 
 
 
@@ -156,10 +164,12 @@ router.put('/profile/:idAthlete', upload.single('photo'), async (req, res) => {
 
 // enviar email para reset contraseña
 
-router.post("/send-email/:idAthlete", async (req, res) => {
+router.post("/send-email/:token/:idAthlete", async (req, res) => {
+    const token = req.params.token;
     const idAthlete = req.params.idAthlete;
-    const user = await getAthleteExists(idAthlete, req.body);
-    if (user !== []) {
+    const emailAthlete = await getEmailAthlete(idAthlete);
+    console.log('esto es email athlete', emailAthlete)
+    if (emailAthlete[0].email === req.body.email) {
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
             port: 587,
@@ -174,7 +184,7 @@ router.post("/send-email/:idAthlete", async (req, res) => {
             from: "Patronus",
             to: req.body.email,
             subject: "Enviado desde nodemailer",
-            text: "http://localhost:4200/reset-pass"
+            text: "http://localhost:4200/reset-pass/" + token + '/' + idAthlete
         }
         
         transporter.sendMail(mailOptions, (error, info) => {
@@ -189,6 +199,18 @@ router.post("/send-email/:idAthlete", async (req, res) => {
 
 });
 
+
+// reset password 
+
+router.put('/resetPassword/:idAthlete', async (req, res) => {
+    req.body.password = bcrypt.hashSync(req.body.password, 10);
+    const id = parseInt(req.params.idAthlete);
+    const result = await resetPassword(req.body, id);
+    res.json(result);
+});
+
+
+// borrar cuenta
 
 router.put('/deleteAccount/:idAthlete', async (req, res) => {
     try {

@@ -24,6 +24,14 @@ const getEmail = (fk_sponsors) => {
 }
 
 
+const getEmailAthlete = (fk_athlete) => {
+    return executeQuery('SELECT email FROM patronus.users WHERE fk_athlete = ?',
+    [fk_athlete]
+    )
+};
+
+
+
 // getAllOffers
 
 const getAllOffers = (idAthlete) => {
@@ -131,6 +139,16 @@ const getAthleteExists = (fk_sponsor, { email }) => {
 };
 
 
+
+// reset password 
+
+const resetPassword = ({password}, fk_athlete) => {
+    return executeQuery('UPDATE patronus.users SET password = ? WHERE fk_athlete = ?',
+    [password, fk_athlete]
+    )
+};
+
+
 // darse de baja
 
 const deleteAccount = (idAthlete) => {
@@ -141,5 +159,5 @@ const deleteAccount = (idAthlete) => {
 
 
 module.exports = {
-    getAllOffers, getOffersWaiting, getOffersRejecteds, editDatesAthlete, getById, totalParticipations, deleteAccount, editDatesUser, updateParticipations, acceptOffer, updatePercentage, rejectOffer, createNew, getAthleteExists, getEmail
+    getAllOffers, getOffersWaiting, getOffersRejecteds, editDatesAthlete, getById, totalParticipations, deleteAccount, editDatesUser, updateParticipations, acceptOffer, updatePercentage, rejectOffer, createNew, getAthleteExists, getEmail, getEmailAthlete, resetPassword
 }
