@@ -91,9 +91,9 @@ const editUser = (idSponsor, {email}) => {
 
 // nueva oferta
 
-const newOffer = (fk_sponsors, {fk_athletes, participations}) => {
-        return executeQuery('INSERT INTO patronus.athletes_sponsors (fk_athletes, fk_sponsors, participations, status) VALUES (?, ?, ?, ?)',
-        [fk_athletes, fk_sponsors, participations, 0]
+const newOffer = (fk_sponsors, {fk_athletes, participations, createdate}) => {
+        return executeQuery('INSERT INTO patronus.athletes_sponsors (fk_athletes, fk_sponsors, participations, createdate, status) VALUES (?, ?, ?, ?, ?)',
+        [fk_athletes, fk_sponsors, participations, createdate, 0]
     );
 }
 

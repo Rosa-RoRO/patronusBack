@@ -95,6 +95,7 @@ const totalParticipations = (fk_ahtletes) => {
 };
 
 
+
 // actualizar participaciones tabla athlete 
 
 const updateParticipations = (quantityDemand, fk_athletes) => {

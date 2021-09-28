@@ -30,6 +30,14 @@ const registerUser = ({ email, password }, fk_athlete, fk_sponsor, role) => {
 
 
 
+// add tokens 
+
+const introduceTokens = ({tokens, limitdate}) => {
+        return executeQuery('INSERT INTO patronus.athletes (quantitydemand, percentage, limitdate) VALUES (?, ?, ?)', 
+        [tokens, 100, limitdate]
+    );
+}
+
 
 
 // const registerAthlete = ({ email, password, fk_athlete, fk_sponsor, name, surname, age, company, logo }) => {
@@ -108,9 +116,9 @@ const changeStatus = ({fk_athletes, fk_sponsors, participations, status, id}) =>
 
 // actualizar followers Intagram y TikTok
 
-const updateFollowers = (followersInstagram) => {
-        return executeQuery('UPDATE patronus.athletes SET followersinstagram = ?',
-        [followersInstagram]
+const updateFollowers = (followersInstagram, followersTikTok, id) => {
+        return executeQuery('UPDATE patronus.athletes SET followersinstagram = ?, followerstiktok = ? WHERE id = ?',
+        [followersInstagram, followersTikTok, id]
     )
 };
 
@@ -129,7 +137,6 @@ const getAthletesNews = () => {
 
 
 
-
 module.exports = {
-    getByEmail, changeStatus, createAthlete, createSponsor, registerUser, getByIdAthlete, getByIdSponsor, getAthletesNews, updateFollowers, getAllAthletes
+    getByEmail, changeStatus, createAthlete, createSponsor, registerUser, getByIdAthlete, getByIdSponsor, getAthletesNews, updateFollowers, getAllAthletes, introduceTokens
 }

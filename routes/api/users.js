@@ -1,5 +1,5 @@
 const { createToken } = require('../../helpers');
-const { getByEmail, changeStatus, createAthlete, registerUser, createSponsor, getAthletesNews, getAllAthletes } = require('../../models/user.model');
+const { getByEmail, changeStatus, createAthlete, registerUser, createSponsor, getAthletesNews, getAllAthletes, updateFollowers, introduceTokens } = require('../../models/user.model');
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 
@@ -24,27 +24,26 @@ router.get('/news', async (req, res) => {
 router.get('/followers', async (req, res) => {
     const athletes = await getAllAthletes();
     console.log(athletes);
-    const athletesInstagram = athletes.forEach((athlete) => {
-        (async () => {
-            const browser = await puppeteer.launch({
-                headless: false
-            });
-            const page = await browser.newPage();
-            await page.goto(`https://www.instagram.com/${athlete.userinstagram}/?hl=es`);
-            await page.screenshot({ path: 'example.png' });
-            
-            let seguidoresInsta = await page.evaluate(() => document.querySelectorAll('.g47SY')[1].innerText.slice(0, 3));
-            console.log('Instagram', seguidoresInsta);
+    const browser = await puppeteer.launch({
+        headless: false
+    });
+    const page = await browser.newPage();
+    for (let athlete of athletes) {
+        await page.goto(`https://www.instagram.com/${athlete.userinstagram}/?hl=es`);
+        await page.waitForSelector('.g47SY');
+        let seguidoresInsta = await page.evaluate(() => document.querySelectorAll('.g47SY')[1].innerText);
+        console.log('Instagram', seguidoresInsta);
+        
+        await page.goto(`https://www.tiktok.com/@${athlete.usertiktok}?`);
+        let seguidoresTikTok = await page.evaluate(() => document.querySelectorAll('.number')[1].innerText);
+        console.log('TikTok', seguidoresTikTok);
 
-            // ir añadiéndolos en un array 
+        // insertar base de datos:
+        const followers = await updateFollowers(seguidoresInsta, seguidoresTikTok, athlete.id);
+        await page.waitForTimeout(500);
+    }
 
-
-            // insertar base de datos:
-            const followers = await updateFollowers(followersInstagram);
-
-            await browser.close();
-        })();
-    })
+    await browser.close();
     //   (async () => {
     //     const browser = await puppeteer.launch({
     //         headless: false
@@ -100,6 +99,16 @@ router.post('/register/athlete',
 
 
 
+// init tokens 
+
+router.post('/registertokens', async (req, res) => {
+    const result = await introduceTokens(req.body);
+    res.json(result);
+})
+
+
+
+
 // register sponsor
 
 router.post('/register/sponsor', 
@@ -133,9 +142,9 @@ router.post('/register/sponsor',
 
 router.post('/login', async (req, res) => {
     const user = await getByEmail(req.body.email);
-    console.log(user);
-    if (!user) {
-        return res.json({ error: 'Error en usuario y/o contraseña - (es el email)' });
+    console.log('Esto es user', user);
+    if (!user || user.status === 0) {
+        return res.json({ error: 'Error en usuario y/o contraseña' });
     }
     const equal = bcrypt.compareSync(req.body.password, user.password);
     console.log('console', user);
@@ -146,16 +155,9 @@ router.post('/login', async (req, res) => {
                 userId: user.fk_athlete || user.fk_sponsor
                 });
     } else {
-        res.json ({error: 'Error en usuario y/o contraseña - (es la contraseña)'})
+        res.json ({ error: 'Error en usuario y/o contraseña' });
     }
 });
-
-
-
-
-
-
-
 
 
 
@@ -166,6 +168,7 @@ router.put('/offers', async (req, res) => {
     const result = await changeStatus(req.body);
     res.json(result);
 });
+
 
 
 

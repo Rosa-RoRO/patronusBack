@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 
-const { getById, getAllOffers, getOffersWaiting, getOffersRejecteds, deleteAccount, editDatesAthlete, editDatesUser, acceptOffer, rejectOffer, createNew, getAthleteExists, getEmail } = require('../../models/athlete.model');
+const { getById, getAllOffers, getOffersWaiting, getOffersRejecteds, deleteAccount, editDatesAthlete, editDatesUser, acceptOffer, rejectOffer, createNew, getAthleteExists, getEmail, updateParticipations, updatePercentage, totalParticipations } = require('../../models/athlete.model');
 const { route } = require('./sponsors');
 
 
@@ -113,11 +113,18 @@ router.put('/acceptOffer/:idOffer', async (req, res) => {
     res.json(result);
 })
 
-router.put('/rejectOffer/:idOffer', async (req, res) => {
+router.put('/rejectOffer/:idOffer/:idAthlete', async (req, res) => {
     const idOffer = req.params.idOffer;
+    const idAthlete = req.params.idAthlete;
     const result = await rejectOffer(idOffer);
-    res.json(result);
-})
+    const sumParticipations = await totalParticipations(idAthlete);
+    const sumParticipationsNumber = Number(sumParticipations[0].total);
+    const quantityDemand = 1000 - sumParticipationsNumber;
+    const participations = await updateParticipations(quantityDemand, idAthlete);
+    const percentageTotal = sumParticipationsNumber * 0.1;
+    const percentage = await updatePercentage(percentageTotal, idAthlete);
+    res.json(percentage);
+});
 
 
 
