@@ -4,7 +4,7 @@ const router = require('express').Router();
 const { getById, getAllOffers, getOffersWaiting, getOffersRejecteds, deleteAccount, editDatesAthlete, editDatesUser, acceptOffer, rejectOffer, createNew, getAthleteExists, getEmail, updateParticipations, updatePercentage, totalParticipations, getEmailAthlete, resetPassword } = require('../../models/athlete.model');
 const { route } = require('./sponsors');
 
-
+const bcrypt = require('bcryptjs');
 
 const fs = require('fs');
 const multer = require('multer');
@@ -164,9 +164,10 @@ router.put('/profile/:idAthlete', upload.single('photo'), async (req, res) => {
 
 // enviar email para reset contraseña
 
-router.post("/send-email/:token/:idAthlete", async (req, res) => {
+router.post("/send-email/:token/:role/:idAthlete", async (req, res) => {
     const token = req.params.token;
     const idAthlete = req.params.idAthlete;
+    const role = req.params.role;
     const emailAthlete = await getEmailAthlete(idAthlete);
     console.log('esto es email athlete', emailAthlete)
     if (emailAthlete[0].email === req.body.email) {
@@ -184,7 +185,7 @@ router.post("/send-email/:token/:idAthlete", async (req, res) => {
             from: "Patronus",
             to: req.body.email,
             subject: "Enviado desde nodemailer",
-            text: "http://localhost:4200/reset-pass/" + token + '/' + idAthlete
+            text: "http://localhost:4200/reset-pass/" + token + '/' + role + '/' + idAthlete
         }
         
         transporter.sendMail(mailOptions, (error, info) => {

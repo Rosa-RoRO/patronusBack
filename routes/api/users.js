@@ -44,26 +44,12 @@ router.get('/followers', async (req, res) => {
     }
 
     await browser.close();
-    //   (async () => {
-    //     const browser = await puppeteer.launch({
-    //         headless: false
-    //     });
-    //     const page = await browser.newPage();
-    //     await page.goto(`https://www.tiktok.com/@${athlete.usertiktok}?`);
-    //     await page.screenshot({ path: 'example.png' });
-    //     const seguidoresTikTok = await await page.evaluate(() => document.querySelectorAll('.number')[1].innerText.slice(0, 3));
-  
-    //     console.log('tiktok', seguidoresTikTok);
 
-    //     await browser.close();
-  
-
-    // })();
     res.json('Todo ok');
 
     // recuperar todos los atletas 
     // recorrer cada atleta 
-    // lanzar el scrappy para cada uno de ellos (en el for...)
+    // lanzar el scrappy para cada uno de ellos 
 });
 
 
@@ -72,7 +58,6 @@ router.get('/followers', async (req, res) => {
 // register athlete
 
 router.post('/register/athlete', 
-    // body('name', 'El campo name debe tener una longitud igual o superior a 3 caracteres').exists().isLength({ min: 3 }), 
     body('password', 'Dabes incluir un password mayor de 3 caracteres y que contenga, al menos: una mayúscula, una minúscula, un número y un símbolo especial').exists().isLength({ min: 4 }).custom(value => {
         const regex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{4,})");
         return regex.test(value);
@@ -142,8 +127,7 @@ router.post('/register/sponsor',
 
 router.post('/login', async (req, res) => {
     const user = await getByEmail(req.body.email);
-    console.log('Esto es user', user);
-    if (!user || user.status === 0) {
+    if (!user) {
         return res.json({ error: 'Error en usuario y/o contraseña' });
     }
     const equal = bcrypt.compareSync(req.body.password, user.password);

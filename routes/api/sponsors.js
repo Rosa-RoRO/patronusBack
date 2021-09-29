@@ -371,21 +371,6 @@ router.put('/profile/:idSponsor', upload.single('logo'), async (req, res) => {
         fs.renameSync(req.file.path, path);
         req.body.logo = 'images/' + newName;
     }
-    // if(req.body.address === null) {
-    //     req.body.address = "";
-    // };
-    // if(req.body.city === null) {
-    //     req.body.city = "";
-    // };
-    // if(req.body.country === null) {
-    //     req.body.country = "";
-    // };
-    // if(req.body.postalcode === null) {
-    //     req.body.postalcode = "";
-    // };
-    // if(req.body.aboutme === null) {
-    //     req.body.aboutme = "";
-    // };
     try {
         const idSponsor = req.params.idSponsor;
         const sponsorChanged = await editSponsor(idSponsor, req.body);
@@ -398,12 +383,14 @@ router.put('/profile/:idSponsor', upload.single('logo'), async (req, res) => {
 });
 
 
+
 // enviar email para reset contraseña
 
-router.post("/send-email/:token/:idSponsor", async (req, res) => {
+router.post("/send-email/:token/:role/:idSponsor", async (req, res) => {
     const token = req.params.token;
     const idSponsor = req.params.idSponsor;
-    const emailSponsor = await getEmailSponsor(idSponsor, req.body);
+    const role = req.params.role;
+    const emailSponsor = await getEmailSponsor(idSponsor);
     if (emailSponsor[0].email === req.body.email) {
         let transporter = nodemailer.createTransport({
             host: "smtp.gmail.com",
@@ -418,8 +405,8 @@ router.post("/send-email/:token/:idSponsor", async (req, res) => {
         let mailOptions = {
             from: "Patronus",
             to: req.body.email,
-            subject: "Enviado desde nodemailer",
-            text: "http://localhost:4200/reset-pass/" + token + '/' + idSponsor
+            subject: "Cambio contraseña Patronus",
+            text: "http://localhost:4200/reset-pass/" + token + '/' + role + '/' + idSponsor
         }
         
         transporter.sendMail(mailOptions, (error, info) => {

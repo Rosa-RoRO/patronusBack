@@ -31,7 +31,6 @@ const checkToken = async (req, res, next) => {
     }
 
     // 4 - Recuperar el usuario logueado;
-        // payload.user_id: Esto le va a decir a la aplicación quién es el usuario que le está lanzando la petición y actuar en consecuencia. 
     let user;
     if(payload.user_role === 'A'){
         user = await getByIdAthlete(payload.user_id);
@@ -43,14 +42,10 @@ const checkToken = async (req, res, next) => {
 }
 
 
-    // PREGUNTA: Diferenciar aquí si es fk_athlete o fk_sponsor
-        // Solo por pasar por el middleware ---> Le puedo añadir una propiedad al req : req.user y ese req.user empieza a formar parte del req y viaja con él, de forma que en los siguientes manejadores estará disponible esta información (de esta forma sabré qué user está logado).
-
-    // Ejemplo: 
 
 const checkRol = (role) => {
     return (req, res, next) => {
-        console.log('esto midlle', req.user);
+        console.log('esto middle', req.user);
         if(req.user.role !== role) {
             return res.json({ error: "No dispones de permisos para acceder a este recurso" });
         }
