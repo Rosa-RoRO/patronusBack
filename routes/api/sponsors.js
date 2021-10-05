@@ -298,9 +298,14 @@ router.post('/newOffer/:idSponsor', async (req, res) => {
         const result = await newOffer(fk_sponsors, req.body);
         const sumParticipations = await totalParticipations(req.body.fk_athletes);
         const sumParticipationsNumber = Number(sumParticipations[0].total);
-        const quantityDemand = 1000 - sumParticipationsNumber;
+        const athlete = await getAthleteById(req.body.fk_athletes);
+        console.log('esto es atleta', athlete);
+        const quantityinit = athlete.quantityinit;
+        console.log('esto es QUANTITYINIT', athlete);
+        const quantityDemand = quantityinit - sumParticipationsNumber;
         const participations = await updateParticipations(quantityDemand, req.body.fk_athletes);
-        const percentageTotal = sumParticipationsNumber * 0.1;
+        const percentageTotal = (sumParticipationsNumber * 100) / quantityinit;
+        console.log('ESTO ES PERCENTAGETOTAL', percentageTotal);
         const percentage = await updatePercentage(percentageTotal, req.body.fk_athletes)
         res.json(percentage);
     } catch (err) {
@@ -397,8 +402,8 @@ router.post("/send-email/:token/:role/:idSponsor", async (req, res) => {
             port: 587,
             secure: false,
             auth: {
-                user: "patronus.spain@gmail.com",
-                pass: "Admin123!"
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASS
             }
         });
         

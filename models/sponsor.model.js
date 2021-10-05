@@ -110,7 +110,6 @@ const offerById = (id) => {
 
 
 
-
 // ordenar atletas por %invertido 
 
 
@@ -119,8 +118,8 @@ const orderByPercentage = () => {
     );
 }
 
-// ordenar atletas por fecha de expiración de la inversión
 
+// ordenar atletas por fecha de expiración de la inversión
 
 const orderByLimitdate = () => {
     return executeQuery('SELECT * FROM patronus.athletes WHERE limitdate > now() ORDER by limitdate ASC', []
@@ -128,7 +127,7 @@ const orderByLimitdate = () => {
 }
 
 
-// Recuperar athletes por country
+// recuperar atletas por país
 
 const getAthletesByCountry = (nameCountry) => {
     return executeQuery('SELECT * FROM patronus.athletes WHERE country = ?',
@@ -136,10 +135,11 @@ const getAthletesByCountry = (nameCountry) => {
     )
 };
 
-// Recuperar athletes por sport
+
+// recuperar atletas por deporte
 
 const getAthletesBySport = (nameSport) => {
-    return executeQuery('SELECT * FROM patronus.athletes WHERE SPORT = ?',
+    return executeQuery('SELECT * FROM patronus.athletes WHERE sport = ?',
     [nameSport]
     )
 };
@@ -171,17 +171,24 @@ const getCountries = () => {
 }
 
 
+// recuperar todos los deportes de los atletas
+
 const getSports = () => {
     return executeQuery('SELECT DISTINCT sport FROM patronus.athletes',
     []
     );
 }
 
+// recuperar los deportes favoritos de los sponsors
+
 const getSportsSponsors = () => {
     return executeQuery('SELECT item_id, item_text FROM patronus.sports', 
     []
     )
 };
+
+
+// recuperar los deportes favoritos de un sponsor
 
 const getFavoriteSportsSponsors = (fk_sponsors) => {
     return executeQuery('SELECT s.item_id, s.item_text FROM patronus.sports s, patronus.sponsors_sports ss WHERE ss.fk_sponsors = ? AND s.item_id = ss.fk_sport', 
@@ -228,26 +235,20 @@ const getMyAthletesFavorites = (fk_sponsors) => {
     )
 }
 
-
-// const getSponsorExists = (fk_sponsor, { email }) => {
-    //         return executeQuery('SELECT * FROM patronus.users WHERE email = ? AND fk_sponsor = ?',
-    //         [email, fk_sponsor]
-    //     )
-    // };
     
+    // recuperar email por id
     
-    
-    const getEmailSponsor = (fk_athlete) => {
+    const getEmailSponsor = (fk_sponsor) => {
         return executeQuery('SELECT email FROM patronus.users WHERE fk_sponsor = ?',
-        [fk_athlete]
+        [fk_sponsor]
         );
     };
     
     
     
     
-    // Comprobar si es favorito
-    
+    // comprobar si el atleta es favorito
+
     const athleteIsFavorite = (idAthlete, idSponsor) => {
         return executeQuery('SELECT * FROM patronus.favorites WHERE fk_athletes = ? AND fk_sponsors = ? AND favorite = 1',
         [idAthlete, idSponsor]
@@ -256,7 +257,7 @@ const getMyAthletesFavorites = (fk_sponsors) => {
     
     
     
-    // Atletas en tendencia 
+    // atletas en tendencia 
     
     const trendsAthletes = () => {
         return executeQuery('SELECT at.id, at.name, at.surname, at.age, at.country, at.sport, at.photo, at.limitdate, at.quantitydemand, at.percentage FROM patronus.athletes_sponsors ats, patronus.athletes at, patronus.sponsors s WHERE ats.fk_athletes = at.id AND ats.fk_sponsors = s.id AND at.limitdate > now() ORDER BY ats.createdate DESC',
@@ -265,7 +266,7 @@ const getMyAthletesFavorites = (fk_sponsors) => {
     };
     
     
-    // Recomendaciones  ----------------------------------
+    // recomendaciones  ----------------------------------
     
     const AthletesByTokens = (rangoIniTokens, rangoFinTokens, idAthlete) => {
         return executeQuery('SELECT * FROM patronus.athletes WHERE quantitydemand BETWEEN ? AND ? AND NOT id = ? AND limitdate > now()', 
@@ -287,6 +288,7 @@ const getMyAthletesFavorites = (fk_sponsors) => {
     };
     
     
+
     // reset password 
     
     const resetPassword = ({password}, fk_sponsor) => {
@@ -298,6 +300,7 @@ const getMyAthletesFavorites = (fk_sponsors) => {
     
     
     // darse de baja
+
     const deleteAccount = (idSponsor) => {
         return executeQuery('UPDATE patronus.sponsors SET status = 0 WHERE id = ?', [idSponsor]);
     }

@@ -291,7 +291,6 @@ Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1MiwiZXhwaXJl
 
 
 ### 
-
 GET http://localhost:3000/api/users/followers
 
 
@@ -304,6 +303,12 @@ Content-Type: application/json
 {
     "email": "kappa@gmail.com"
 }
+
+
+###
+PUT http://localhost:3000/api/users/deleteAccount/A/52
+
+
 
 
 

@@ -1,11 +1,12 @@
 const { createToken } = require('../../helpers');
-const { getByEmail, changeStatus, createAthlete, registerUser, createSponsor, getAthletesNews, getAllAthletes, updateFollowers, introduceTokens } = require('../../models/user.model');
+const { getByEmail, changeStatus, createAthlete, registerUser, createSponsor, getAthletesNews, getAllAthletes, updateFollowers, introduceTokens, deleteAccountAthlete, deleteAccountSponsor } = require('../../models/user.model');
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 
 const router = require('express').Router();
 
 const puppeteer = require('puppeteer');
+const { getById } = require('../../models/sponsor.model');
 
 
 
@@ -33,9 +34,10 @@ router.get('/followers', async (req, res) => {
         await page.waitForSelector('.g47SY');
         let seguidoresInsta = await page.evaluate(() => document.querySelectorAll('.g47SY')[1].innerText);
         console.log('Instagram', seguidoresInsta);
-        
         await page.goto(`https://www.tiktok.com/@${athlete.usertiktok}?`);
-        let seguidoresTikTok = await page.evaluate(() => document.querySelectorAll('.number')[1].innerText);
+        let seguidoresTikTokBruto = await page.evaluate(() => document.querySelectorAll('.number')[1].innerText);
+        let seguidoresTikTokNumber = seguidoresTikTokBruto.split("S");
+        let seguidoresTikTok = seguidoresTikTokNumber[0];
         console.log('TikTok', seguidoresTikTok);
 
         // insertar base de datos:
@@ -47,15 +49,12 @@ router.get('/followers', async (req, res) => {
 
     res.json('Todo ok');
 
-    // recuperar todos los atletas 
-    // recorrer cada atleta 
-    // lanzar el scrappy para cada uno de ellos 
 });
 
 
 
 
-// register athlete
+// registrar atleta
 
 router.post('/register/athlete', 
     body('password', 'Debes incluir un password mayor de 3 caracteres y que contenga, al menos: una mayúscula, una minúscula, un número y un símbolo especial').exists().isLength({ min: 4 }).custom(value => {
@@ -76,7 +75,7 @@ router.post('/register/athlete',
             const athlete = await createAthlete(req.body);
             req.body.password = bcrypt.hashSync(req.body.password, 10);
             const result = await registerUser(req.body, athlete.insertId, null, 'A');
-            res.json(result);
+            res.json(athlete.insertId);
         } catch (err) {
             res.json({error: err.message})
         }
@@ -84,17 +83,18 @@ router.post('/register/athlete',
 
 
 
-// init tokens 
+// registrar tokens 
 
-router.post('/registertokens', async (req, res) => {
-    const result = await introduceTokens(req.body);
+router.post('/registertokens/:idDeportista', async (req, res) => {
+    const idDeportista = req.params.idDeportista;
+    const result = await introduceTokens(idDeportista, req.body);
     res.json(result);
 })
 
 
 
 
-// register sponsor
+// registrar sponsor
 
 router.post('/register/sponsor', 
     body('password', 'Dabes incluir un password mayor de 3 caracteres y que contenga, al menos: una mayúscula, una minúscula, un número y un símbolo especial').exists().isLength({ min: 4 }).custom(value => {
@@ -127,7 +127,7 @@ router.post('/register/sponsor',
 
 router.post('/login', async (req, res) => {
     const user = await getByEmail(req.body.email);
-    if (!user) {
+    if (!user || user.status === 0) {
         return res.json({ error: 'Error en usuario y/o contraseña' });
     }
     const equal = bcrypt.compareSync(req.body.password, user.password);
@@ -153,6 +153,20 @@ router.put('/offers', async (req, res) => {
     res.json(result);
 });
 
+
+
+// cambiar status usuario 
+
+router.put('/deleteAccount/:role/:id', async (req, res) => {
+    const id = req.params.id;
+    if (req.params.role === 'A') {
+        const result = await deleteAccountAthlete(id);
+        res.json(result);
+    } else {
+        const result = await deleteAccountSponsor(id);
+        res.json(result);
+    }
+});
 
 
 

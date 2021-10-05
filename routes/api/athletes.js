@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 
-const { getById, getAllOffers, getOffersWaiting, getOffersRejecteds, deleteAccount, editDatesAthlete, editDatesUser, acceptOffer, rejectOffer, createNew, getAthleteExists, getEmail, updateParticipations, updatePercentage, totalParticipations, getEmailAthlete, resetPassword } = require('../../models/athlete.model');
+const { getById, getAllOffers, getOffersWaiting, getOffersRejecteds, deleteAccount, editDatesAthlete, editDatesUser, acceptOffer, rejectOffer, createNew, getEmail, updateParticipations, updatePercentage, totalParticipations, getEmailAthlete, resetPassword } = require('../../models/athlete.model');
 const { route } = require('./sponsors');
 
 const bcrypt = require('bcryptjs');
@@ -128,9 +128,10 @@ router.put('/rejectOffer/:idOffer/:idAthlete', async (req, res) => {
     const result = await rejectOffer(idOffer);
     const sumParticipations = await totalParticipations(idAthlete);
     const sumParticipationsNumber = Number(sumParticipations[0].total);
-    const quantityDemand = 1000 - sumParticipationsNumber;
+    const athlete = await getById(idAthlete);
+    const quantityDemand = athlete.quantityinit - sumParticipationsNumber;
     const participations = await updateParticipations(quantityDemand, idAthlete);
-    const percentageTotal = sumParticipationsNumber * 0.1;
+    const percentageTotal = (sumParticipationsNumber * 100) / athlete.quantityinit;
     const percentage = await updatePercentage(percentageTotal, idAthlete);
     res.json(percentage);
 });
@@ -176,8 +177,8 @@ router.post("/send-email/:token/:role/:idAthlete", async (req, res) => {
             port: 587,
             secure: false,
             auth: {
-                user: "patronus.spain@gmail.com",
-                pass: "Admin123!"
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASS
             }
         });
         
